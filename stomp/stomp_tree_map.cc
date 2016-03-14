@@ -441,16 +441,10 @@ void TreeMap::FindPairsWithRegions(AngularVector& ang, AngularBin& theta) {
     uint16_t region = FindRegion(center_pix);
 
     for (PixelIterator pix_iter=pix.begin();pix_iter!=pix.end();++pix_iter) {
-      if (region == FindRegion(*pix_iter)) {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  n_pair = tree_map_[pix_iter->Pixnum()]->FindPairs(*ang_iter,
-							    theta, region);
-      } else {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  n_pair = tree_map_[pix_iter->Pixnum()]->FindPairs(*ang_iter, theta);
-      }
+    	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
+    	if (iter != tree_map_.end())
+    	  n_pair = tree_map_[pix_iter->Pixnum()]->FindPairs(
+    	    *ang_iter, theta, region, FindRegion(*pix_iter));
     }
   }
 }
@@ -482,18 +476,10 @@ void TreeMap::FindWeightedPairsWithRegions(AngularVector& ang,
     uint16_t region = FindRegion(center_pix);
 
     for (PixelIterator pix_iter=pix.begin();pix_iter!=pix.end();++pix_iter) {
-      if (region == FindRegion(*pix_iter)) {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter,
-							     theta, region);
-      } else {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter, theta);
-      }
+    	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
+    	if (iter != tree_map_.end())
+    	  total_weight = tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(
+    	    *ang_iter, theta, region, FindRegion(*pix_iter));
     }
   }
 }
@@ -526,18 +512,10 @@ void TreeMap::FindWeightedPairsWithRegions(WAngularVector& w_ang,
     uint16_t region = FindRegion(center_pix);
 
     for (PixelIterator pix_iter=pix.begin();pix_iter!=pix.end();++pix_iter) {
-      if (region == FindRegion(*pix_iter)) {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter,
-							     theta, region);
-      } else {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter, theta);
-      }
+    	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
+    	if (iter != tree_map_.end())
+    		total_weight = tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(
+    		  *ang_iter, theta, region, FindRegion(*pix_iter));
     }
   }
 }
@@ -564,18 +542,10 @@ void TreeMap::FindWeightedPairsWithRegions(CosmoVector& c_ang,
     uint16_t region = FindRegion(center_pix);
 
     for (PixelIterator pix_iter=pix.begin();pix_iter!=pix.end();++pix_iter) {
-      if (region == FindRegion(*pix_iter)) {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter,
-							     radius, region);
-      } else {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter, radius);
-      }
+    	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
+    	if (iter != tree_map_.end())
+    		tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(
+    		  *ang_iter, radius, region, FindRegion(*pix_iter));
     }
   }
 }
@@ -608,19 +578,10 @@ void TreeMap::FindWeightedPairsWithRegions(AngularVector& ang,
     uint16_t region = FindRegion(center_pix);
 
     for (PixelIterator pix_iter=pix.begin();pix_iter!=pix.end();++pix_iter) {
-      if (region == FindRegion(*pix_iter)) {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter, theta,
-							     field_name,region);
-      } else {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter, theta,
-							     field_name);
-      }
+    	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
+    	if (iter != tree_map_.end())
+    		tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(
+    		  *ang_iter, theta, field_name, region, FindRegion(*pix_iter));
     }
   }
 }
@@ -655,19 +616,10 @@ void TreeMap::FindWeightedPairsWithRegions(WAngularVector& w_ang,
     uint16_t region = FindRegion(center_pix);
 
     for (PixelIterator pix_iter=pix.begin();pix_iter!=pix.end();++pix_iter) {
-      if (region == FindRegion(*pix_iter)) {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter, theta,
-							     field_name,region);
-      } else {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter, theta,
-							     field_name);
-      }
+    	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
+    	total_weight =
+    	  tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(
+    	    *ang_iter, theta, field_name, region, FindRegion(*pix_iter));
     }
   }
 }
@@ -703,22 +655,11 @@ void TreeMap::FindWeightedPairsWithRegions(WAngularVector& w_ang,
     uint16_t region = FindRegion(center_pix);
 
     for (PixelIterator pix_iter=pix.begin();pix_iter!=pix.end();++pix_iter) {
-      if (region == FindRegion(*pix_iter)) {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter,
-							     ang_field_name,
-							     theta, field_name,
-							     region);
-      } else {
-	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
-	if (iter != tree_map_.end())
-	  total_weight =
-	    tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(*ang_iter,
-							     ang_field_name,
-							     theta, field_name);
-      }
+    	TreeDictIterator iter = tree_map_.find(pix_iter->Pixnum());
+    	if (iter != tree_map_.end())
+    		tree_map_[pix_iter->Pixnum()]->FindWeightedPairs(
+    		  *ang_iter, ang_field_name, theta, field_name,
+    		  region, FindRegion(*pix_iter));
     }
   }
 }

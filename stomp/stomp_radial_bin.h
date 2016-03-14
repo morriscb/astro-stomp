@@ -80,6 +80,7 @@ class RadialBin : public AngularBin {
 
  private:
   double r_min_, r_max_, redshift_, r_;
+  bool leave_one_out_jackknife_;
 };
 
 } // end namespace Stomp

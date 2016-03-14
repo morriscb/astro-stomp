@@ -78,20 +78,24 @@ class RadialCorrelation : public AngularCorrelation {
   // Some wrapper methods for find the auto-correlation and cross-correlations
   void FindAutoCorrelation(Map& stomp_map,
 			   CosmoVector& galaxy,
-			   uint8_t random_iterations = 1);
+			   uint8_t random_iterations = 1,
+			   bool use_weighted_randoms = false);
   void FindCrossCorrelation(Map& stomp_map,
   			   CosmoVector& galaxy_z,
   			   WAngularVector& galaxy_w,
-  			   uint8_t random_iterations = 1);
+  			   uint8_t random_iterations = 1,
+  			   bool use_weighted_randoms = false);
   void FindAutoCorrelationWithRegions(Map& stomp_map,
 				      CosmoVector& galaxy,
 				      uint8_t random_iterations = 1,
-				      uint16_t n_regions = 0);
+				      uint16_t n_regions = 0,
+				      bool use_weighted_randoms = false);
   void FindCrossCorrelationWithRegions(Map& stomp_map,
   			      CosmoVector& galaxy_z,
   			      WAngularVector& galaxy_w,
   			      uint8_t random_iterations = 1,
-  			      uint16_t n_regions = 0);
+  			      uint16_t n_regions = 0,
+  			      bool use_weighted_randoms = false);
 
   // In general, the code will use a pair-based method for small angular
   // scales and a pixel-based method for large angular scales.  In the above
@@ -109,11 +113,13 @@ class RadialCorrelation : public AngularCorrelation {
   //void FindPixelCrossCorrelation(ScalarMap& stomp_map_a,
   //				 ScalarMap& stomp_map_b);
   void FindPairAutoCorrelation(Map& stomp_map, CosmoVector& galaxy,
-			       uint8_t random_iterations = 1);
+			       uint8_t random_iterations = 1,
+			       bool use_weighted_randoms = false);
   void FindPairCrossCorrelation(Map& stomp_map,
 				CosmoVector& galaxy_z,
 				WAngularVector& galaxy_w,
-				uint8_t random_iterations = 1);
+				uint8_t random_iterations = 1,
+				bool use_weighted_randoms = false);
 
   // Once we're done calculating our correlation function, we can write it out
   // to an ASCII file.  The output format will be

@@ -117,7 +117,7 @@ bool TreePixel::_InitializeSubPixels() {
 
 uint32_t TreePixel::DirectPairCount(AngularCoordinate& ang,
 				    AngularBin& theta,
-				    int16_t region) {
+				    int16_t region_a, int16_t region_b) {
   uint32_t pair_count = 0;
   if (theta.ThetaMax() < 90.0) {
     for (WAngularPtrIterator iter=ang_.begin();iter!=ang_.end();++iter) {
@@ -129,19 +129,19 @@ uint32_t TreePixel::DirectPairCount(AngularCoordinate& ang,
     }
   }
 
-  theta.AddToCounter(pair_count, region);
+  theta.AddToCounter(pair_count, region_a, region_b);
   return pair_count;
 }
 
 uint32_t TreePixel::FindPairs(AngularCoordinate& ang, AngularBin& theta,
-			      int16_t region) {
+			      int16_t region_a, int16_t region_b) {
   uint32_t pair_count = 0;
 
   // If we have AngularCoordinates in this pixel, then this is just a
   // matter of iterating through them and finding how many satisfy the
   // angular bounds.
   if (!ang_.empty()) {
-    pair_count = DirectPairCount(ang, theta, region);
+    pair_count = DirectPairCount(ang, theta, region_a, region_b);
   } else {
     // If the current pixel doesn't contain any points, then we need to see
     // if either the current pixel is either fully or partially contained in
@@ -154,13 +154,13 @@ uint32_t TreePixel::FindPairs(AngularCoordinate& ang, AngularBin& theta,
     if (intersects_annulus == 1) {
       // Fully contained in the annulus.
       pair_count = point_count_;
-      theta.AddToCounter(point_count_, region);
+      theta.AddToCounter(point_count_, region_a, region_b);
     } else {
       if (intersects_annulus == -1) {
       // Partial intersection with the annulus.
 	for (TreePtrIterator iter=subpix_.begin();
 	     iter!=subpix_.end();++iter) {
-	  pair_count += (*iter)->FindPairs(ang, theta, region);
+	  pair_count += (*iter)->FindPairs(ang, theta, region_a, region_b);
 	}
       } else {
 	// Completely outside the annulus.
@@ -183,7 +183,7 @@ uint32_t TreePixel::FindPairs(AngularCoordinate& ang, double theta_max) {
 }
 
 double TreePixel::DirectWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
-				      int16_t region) {
+				      int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   uint32_t n_pairs = 0;
 
@@ -203,20 +203,20 @@ double TreePixel::DirectWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
     }
   }
 
-  theta.AddToWeight(total_weight, region);
-  theta.AddToCounter(n_pairs, region);
+  theta.AddToWeight(total_weight, region_a, region_b);
+  theta.AddToCounter(n_pairs, region_a, region_b);
 
   return total_weight;
 }
 
 double TreePixel::FindWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
-				    int16_t region) {
+				    int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   // If we have AngularCoordinates in this pixel, then this is just a
   // matter of iterating through them and finding how many satisfy the
   // angular bounds.
   if (!ang_.empty()) {
-    total_weight = DirectWeightedPairs(ang, theta, region);
+    total_weight = DirectWeightedPairs(ang, theta, region_a, region_b);
   } else {
     // If the current pixel doesn't contain any points, then we need to see
     // if either the current pixel is either fully or partially contained in
@@ -228,14 +228,14 @@ double TreePixel::FindWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
     if (intersects_annulus == 1) {
       // Fully contained in the annulus.
       total_weight = Weight();
-      theta.AddToWeight(Weight(), region);
-      theta.AddToCounter(point_count_, region);
+      theta.AddToWeight(Weight(), region_a, region_b);
+      theta.AddToCounter(point_count_, region_a, region_b);
     } else {
       if (intersects_annulus == -1) {
       // Partial intersection with the annulus.
 	for (TreePtrIterator iter=subpix_.begin();
 	     iter!=subpix_.end();++iter) {
-	  total_weight += (*iter)->FindWeightedPairs(ang, theta, region);
+	  total_weight += (*iter)->FindWeightedPairs(ang, theta, region_a, region_b);
 	}
       } else {
 	// Completely outside the annulus.
@@ -258,7 +258,7 @@ double TreePixel::FindWeightedPairs(AngularCoordinate& ang, double theta_max) {
 }
 
 double TreePixel::DirectWeightedPairs(WeightedAngularCoordinate& w_ang,
-				      AngularBin& theta, int16_t region) {
+				      AngularBin& theta, int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   uint32_t n_pairs = 0;
 
@@ -280,20 +280,20 @@ double TreePixel::DirectWeightedPairs(WeightedAngularCoordinate& w_ang,
 
   total_weight *= w_ang.Weight();
 
-  theta.AddToWeight(total_weight, region);
-  theta.AddToCounter(n_pairs, region);
+  theta.AddToWeight(total_weight, region_a, region_b);
+  theta.AddToCounter(n_pairs, region_a, region_b);
 
   return total_weight;
 }
 
 double TreePixel::FindWeightedPairs(WeightedAngularCoordinate& w_ang,
-				    AngularBin& theta, int16_t region) {
+				    AngularBin& theta, int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   // If we have AngularCoordinates in this pixel, then this is just a
   // matter of iterating through them and finding how many satisfy the
   // angular bounds.
   if (!ang_.empty()) {
-    total_weight = DirectWeightedPairs(w_ang, theta, region);
+    total_weight = DirectWeightedPairs(w_ang, theta, region_a, region_b);
   } else {
     // If the current pixel doesn't contain any points, then we need to see
     // if either the current pixel is either fully or partially contained in
@@ -305,14 +305,14 @@ double TreePixel::FindWeightedPairs(WeightedAngularCoordinate& w_ang,
     if (intersects_annulus == 1) {
       // Fully contained in the annulus.
       total_weight = Weight()*w_ang.Weight();
-      theta.AddToWeight(Weight(), region);
-      theta.AddToCounter(point_count_, region);
+      theta.AddToWeight(Weight(), region_a, region_b);
+      theta.AddToCounter(point_count_, region_a, region_b);
     } else {
       if (intersects_annulus == -1) {
       // Partial intersection with the annulus.
 	for (TreePtrIterator iter=subpix_.begin();
 	     iter!=subpix_.end();++iter) {
-	  total_weight += (*iter)->FindWeightedPairs(w_ang, theta, region);
+	  total_weight += (*iter)->FindWeightedPairs(w_ang, theta, region_a, region_b);
 	}
       } else {
 	// Completely outside the annulus.
@@ -336,70 +336,70 @@ double TreePixel::FindWeightedPairs(WeightedAngularCoordinate& w_ang,
 }
 
 void TreePixel::FindPairs(AngularVector& ang, AngularBin& theta,
-			  int16_t region) {
+			  int16_t region_a, int16_t region_b) {
   uint32_t n_pairs = 0;
   for (AngularIterator ang_iter=ang.begin();ang_iter!=ang.end();++ang_iter) {
-    n_pairs = FindPairs(*ang_iter, theta, region);
+    n_pairs = FindPairs(*ang_iter, theta, region_a, region_b);
   }
 }
 
 void TreePixel::FindPairs(AngularVector& ang, AngularCorrelation& wtheta,
-			  int16_t region) {
+			  int16_t region_a, int16_t region_b) {
   uint32_t n_pairs = 0;
   for (ThetaIterator theta_iter=wtheta.Begin(0);
        theta_iter!=wtheta.End(0);++theta_iter) {
     for (AngularIterator ang_iter=ang.begin();
 	 ang_iter!=ang.end();++ang_iter) {
-      n_pairs = FindPairs(*ang_iter, *theta_iter, region);
+      n_pairs = FindPairs(*ang_iter, *theta_iter, region_a, region_b);
     }
   }
 }
 
 void TreePixel::FindWeightedPairs(AngularVector& ang, AngularBin& theta,
-				  int16_t region) {
+				  int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   for (AngularIterator ang_iter=ang.begin();ang_iter!=ang.end();++ang_iter) {
-    total_weight = FindWeightedPairs(*ang_iter, theta, region);
+    total_weight = FindWeightedPairs(*ang_iter, theta, region_a, region_b);
   }
 }
 
 void TreePixel::FindWeightedPairs(AngularVector& ang,
 				  AngularCorrelation& wtheta,
-				  int16_t region) {
+				  int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   for (ThetaIterator theta_iter=wtheta.Begin(0);
        theta_iter!=wtheta.End(0);++theta_iter) {
     for (AngularIterator ang_iter=ang.begin();
 	 ang_iter!=ang.end();++ang_iter) {
-      total_weight = FindWeightedPairs(*ang_iter, *theta_iter, region);
+      total_weight = FindWeightedPairs(*ang_iter, *theta_iter, region_a, region_b);
     }
   }
 }
 
 void TreePixel::FindWeightedPairs(WAngularVector& w_ang, AngularBin& theta,
-				  int16_t region) {
+				  int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   for (WAngularIterator ang_iter=w_ang.begin();
        ang_iter!=w_ang.end();++ang_iter) {
-    total_weight = FindWeightedPairs(*ang_iter, theta, region);
+    total_weight = FindWeightedPairs(*ang_iter, theta, region_a, region_b);
   }
 }
 
 void TreePixel::FindWeightedPairs(WAngularVector& w_ang,
-				  AngularCorrelation& wtheta, int16_t region) {
+				  AngularCorrelation& wtheta, int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   for (ThetaIterator theta_iter=wtheta.Begin(0);
        theta_iter!=wtheta.End(0);++theta_iter) {
     for (WAngularIterator ang_iter=w_ang.begin();
 	 ang_iter!=w_ang.end();++ang_iter) {
-      total_weight = FindWeightedPairs(*ang_iter, *theta_iter, region);
+      total_weight = FindWeightedPairs(*ang_iter, *theta_iter, region_a, region_b);
     }
   }
 }
 
 double TreePixel::DirectWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
 				      const std::string& field_name,
-				      int16_t region) {
+				      int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   uint32_t n_pairs = 0;
 
@@ -419,21 +419,21 @@ double TreePixel::DirectWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
     }
   }
 
-  theta.AddToWeight(total_weight, region);
-  theta.AddToCounter(n_pairs, region);
+  theta.AddToWeight(total_weight, region_a, region_b);
+  theta.AddToCounter(n_pairs, region_a, region_b);
 
   return total_weight;
 }
 
 double TreePixel::FindWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
 				    const std::string& field_name,
-				    int16_t region) {
+				    int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   // If we have AngularCoordinates in this pixel, then this is just a
   // matter of iterating through them and finding how many satisfy the
   // angular bounds.
   if (!ang_.empty()) {
-    total_weight = DirectWeightedPairs(ang, theta, field_name, region);
+    total_weight = DirectWeightedPairs(ang, theta, field_name, region_a, region_b);
   } else {
     // If the current pixel doesn't contain any points, then we need to see
     // if either the current pixel is either fully or partially contained in
@@ -445,15 +445,15 @@ double TreePixel::FindWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
     if (intersects_annulus == 1) {
       // Fully contained in the annulus.
       total_weight = FieldTotal(field_name);
-      theta.AddToWeight(total_weight, region);
-      theta.AddToCounter(point_count_, region);
+      theta.AddToWeight(total_weight, region_a, region_b);
+      theta.AddToCounter(point_count_, region_a, region_b);
     } else {
       if (intersects_annulus == -1) {
       // Partial intersection with the annulus.
 	for (TreePtrIterator iter=subpix_.begin();
 	     iter!=subpix_.end();++iter) {
 	  total_weight +=
-	    (*iter)->FindWeightedPairs(ang, theta, field_name, region);
+	    (*iter)->FindWeightedPairs(ang, theta, field_name, region_a, region_b);
 	}
       } else {
 	// Completely outside the annulus.
@@ -479,23 +479,23 @@ double TreePixel::FindWeightedPairs(AngularCoordinate& ang, double theta_max,
 
 void TreePixel::FindWeightedPairs(AngularVector& ang, AngularBin& theta,
 				  const std::string& field_name,
-				  int16_t region) {
+				  int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   for (AngularIterator ang_iter=ang.begin();ang_iter!=ang.end();++ang_iter) {
-    total_weight = FindWeightedPairs(*ang_iter, theta, field_name, region);
+    total_weight = FindWeightedPairs(*ang_iter, theta, field_name, region_a, region_b);
   }
 }
 
 void TreePixel::FindWeightedPairs(AngularVector& ang,
 				  AngularCorrelation& wtheta,
-				  const std::string& field_name, int16_t region) {
+				  const std::string& field_name, int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   for (ThetaIterator theta_iter=wtheta.Begin(0);
        theta_iter!=wtheta.End(0);++theta_iter) {
     for (AngularIterator ang_iter=ang.begin();
 	 ang_iter!=ang.end();++ang_iter) {
       total_weight =
-	FindWeightedPairs(*ang_iter, *theta_iter, field_name, region);
+	FindWeightedPairs(*ang_iter, *theta_iter, field_name, region_a, region_b);
     }
   }
 }
@@ -503,7 +503,7 @@ void TreePixel::FindWeightedPairs(AngularVector& ang,
 double TreePixel::DirectWeightedPairs(WeightedAngularCoordinate& w_ang,
 				      AngularBin& theta,
 				      const std::string& field_name,
-				      int16_t region) {
+				      int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   uint32_t n_pairs = 0;
 
@@ -525,8 +525,8 @@ double TreePixel::DirectWeightedPairs(WeightedAngularCoordinate& w_ang,
 
   total_weight *= w_ang.Weight();
 
-  theta.AddToWeight(total_weight, region);
-  theta.AddToCounter(n_pairs, region);
+  theta.AddToWeight(total_weight, region_a, region_b);
+  theta.AddToCounter(n_pairs, region_a, region_b);
 
   return total_weight;
 }
@@ -534,13 +534,13 @@ double TreePixel::DirectWeightedPairs(WeightedAngularCoordinate& w_ang,
 double TreePixel::FindWeightedPairs(WeightedAngularCoordinate& w_ang,
 				    AngularBin& theta,
 				    const std::string& field_name,
-				    int16_t region) {
+				    int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   // If we have AngularCoordinates in this pixel, then this is just a
   // matter of iterating through them and finding how many satisfy the
   // angular bounds.
   if (!ang_.empty()) {
-    total_weight = DirectWeightedPairs(w_ang, theta, field_name, region);
+    total_weight = DirectWeightedPairs(w_ang, theta, field_name, region_a, region_b);
   } else {
     // If the current pixel doesn't contain any points, then we need to see
     // if either the current pixel is either fully or partially contained in
@@ -552,15 +552,15 @@ double TreePixel::FindWeightedPairs(WeightedAngularCoordinate& w_ang,
     if (intersects_annulus == 1) {
       // Fully contained in the annulus.
       total_weight = FieldTotal(field_name)*w_ang.Weight();
-      theta.AddToWeight(total_weight, region);
-      theta.AddToCounter(point_count_, region);
+      theta.AddToWeight(total_weight, region_a, region_b);
+      theta.AddToCounter(point_count_, region_a, region_b);
     } else {
       if (intersects_annulus == -1) {
       // Partial intersection with the annulus.
 	for (TreePtrIterator iter=subpix_.begin();
 	     iter!=subpix_.end();++iter) {
 	  total_weight +=
-	    (*iter)->FindWeightedPairs(w_ang, theta, field_name, region);
+	    (*iter)->FindWeightedPairs(w_ang, theta, field_name, region_a, region_b);
 	}
       } else {
 	// Completely outside the annulus.
@@ -588,25 +588,25 @@ double TreePixel::FindWeightedPairs(WeightedAngularCoordinate& w_ang,
 void TreePixel::FindWeightedPairs(WAngularVector& w_ang,
 				  AngularBin& theta,
 				  const std::string& field_name,
-				  int16_t region) {
+				  int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   for (WAngularIterator ang_iter=w_ang.begin();
        ang_iter!=w_ang.end();++ang_iter) {
-    total_weight = FindWeightedPairs(*ang_iter, theta, field_name, region);
+    total_weight = FindWeightedPairs(*ang_iter, theta, field_name, region_a, region_b);
   }
 }
 
 void TreePixel::FindWeightedPairs(WAngularVector& w_ang,
 				  AngularCorrelation& wtheta,
 				  const std::string& field_name,
-				  int16_t region) {
+				  int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   for (ThetaIterator theta_iter=wtheta.Begin(0);
        theta_iter!=wtheta.End(0);++theta_iter) {
     for (WAngularIterator ang_iter=w_ang.begin();
 	 ang_iter!=w_ang.end();++ang_iter) {
       total_weight =
-	FindWeightedPairs(*ang_iter, *theta_iter, field_name, region);
+	FindWeightedPairs(*ang_iter, *theta_iter, field_name, region_a, region_b);
     }
   }
 }
@@ -615,7 +615,7 @@ double TreePixel::DirectWeightedPairs(WeightedAngularCoordinate& w_ang,
 				      const std::string& ang_field_name,
 				      AngularBin& theta,
 				      const std::string& field_name,
-				      int16_t region) {
+				      int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   uint32_t n_pairs = 0;
 
@@ -637,8 +637,8 @@ double TreePixel::DirectWeightedPairs(WeightedAngularCoordinate& w_ang,
 
   total_weight *= w_ang.Field(ang_field_name);
 
-  theta.AddToWeight(total_weight, region);
-  theta.AddToCounter(n_pairs, region);
+  theta.AddToWeight(total_weight, region_a, region_b);
+  theta.AddToCounter(n_pairs, region_a, region_b);
 
   return total_weight;
 }
@@ -647,14 +647,14 @@ double TreePixel::FindWeightedPairs(WeightedAngularCoordinate& w_ang,
 				    const std::string& ang_field_name,
 				    AngularBin& theta,
 				    const std::string& field_name,
-				    int16_t region) {
+				    int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   // If we have AngularCoordinates in this pixel, then this is just a
   // matter of iterating through them and finding how many satisfy the
   // angular bounds.
   if (!ang_.empty()) {
     total_weight =
-      DirectWeightedPairs(w_ang, ang_field_name, theta, field_name, region);
+      DirectWeightedPairs(w_ang, ang_field_name, theta, field_name, region_a, region_b);
   } else {
     // If the current pixel doesn't contain any points, then we need to see
     // if either the current pixel is either fully or partially contained in
@@ -666,8 +666,8 @@ double TreePixel::FindWeightedPairs(WeightedAngularCoordinate& w_ang,
     if (intersects_annulus == 1) {
       // Fully contained in the annulus.
       total_weight = FieldTotal(field_name)*w_ang.Field(ang_field_name);
-      theta.AddToWeight(total_weight, region);
-      theta.AddToCounter(point_count_, region);
+      theta.AddToWeight(total_weight, region_a, region_b);
+      theta.AddToCounter(point_count_, region_a, region_b);
     } else {
       if (intersects_annulus == -1) {
       // Partial intersection with the annulus.
@@ -675,7 +675,7 @@ double TreePixel::FindWeightedPairs(WeightedAngularCoordinate& w_ang,
 	     iter!=subpix_.end();++iter) {
 	  total_weight +=
 	    (*iter)->FindWeightedPairs(w_ang, ang_field_name, theta,
-				       field_name, region);
+				       field_name, region_a, region_b);
 	}
       } else {
 	// Completely outside the annulus.
@@ -706,12 +706,12 @@ void TreePixel::FindWeightedPairs(WAngularVector& w_ang,
 				  const std::string& ang_field_name,
 				  AngularBin& theta,
 				  const std::string& field_name,
-				  int16_t region) {
+				  int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   for (WAngularIterator ang_iter=w_ang.begin();
        ang_iter!=w_ang.end();++ang_iter) {
     total_weight = FindWeightedPairs(*ang_iter, ang_field_name, theta,
-				     field_name, region);
+				     field_name, region_a, region_b);
   }
 }
 
@@ -719,7 +719,7 @@ void TreePixel::FindWeightedPairs(WAngularVector& w_ang,
 				  const std::string& ang_field_name,
 				  AngularCorrelation& wtheta,
 				  const std::string& field_name,
-				  int16_t region) {
+				  int16_t region_a, int16_t region_b) {
   double total_weight = 0.0;
   for (ThetaIterator theta_iter=wtheta.Begin(0);
        theta_iter!=wtheta.End(0);++theta_iter) {
@@ -727,7 +727,7 @@ void TreePixel::FindWeightedPairs(WAngularVector& w_ang,
 	 ang_iter!=w_ang.end();++ang_iter) {
       total_weight =
 	FindWeightedPairs(*ang_iter, ang_field_name, *theta_iter,
-			  field_name, region);
+			  field_name, region_a, region_b);
     }
   }
 }

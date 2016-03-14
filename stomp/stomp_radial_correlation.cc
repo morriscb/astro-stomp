@@ -95,7 +95,8 @@ void RadialCorrelation::ClearRegions() {
 
 void RadialCorrelation::FindAutoCorrelation(Map& stomp_map,
 					    CosmoVector& galaxy,
-					    uint8_t random_iterations) {
+					    uint8_t random_iterations,
+					    bool use_weighted_randoms) {
   //if (!manual_resolution_break_)
   //  AutoMaxResolution(galaxy.size(), stomp_map.Area());
 
@@ -103,13 +104,15 @@ void RadialCorrelation::FindAutoCorrelation(Map& stomp_map,
   //  FindPixelAutoCorrelation(stomp_map, galaxy);
 
   //if (theta_pair_begin_ != theta_pair_end_)
-  FindPairAutoCorrelation(stomp_map, galaxy, random_iterations);
+  FindPairAutoCorrelation(stomp_map, galaxy, random_iterations,
+  		                    use_weighted_randoms);
 }
 
 void RadialCorrelation::FindCrossCorrelation(Map& stomp_map,
 					    CosmoVector& galaxy_z,
 					    WAngularVector& galaxy_w,
-					    uint8_t random_iterations) {
+					    uint8_t random_iterations,
+					    bool use_weighted_randoms) {
   //if (!manual_resolution_break_)
   //  AutoMaxResolution(galaxy.size(), stomp_map.Area());
 
@@ -117,12 +120,14 @@ void RadialCorrelation::FindCrossCorrelation(Map& stomp_map,
   //  FindPixelAutoCorrelation(stomp_map, galaxy);
 
   //if (theta_pair_begin_ != theta_pair_end_)
-  FindPairCrossCorrelation(stomp_map, galaxy_z, galaxy_w, random_iterations);
+  FindPairCrossCorrelation(stomp_map, galaxy_z, galaxy_w, random_iterations,
+  		                     use_weighted_randoms);
 }
 
 void RadialCorrelation::FindPairAutoCorrelation(Map& stomp_map,
 						CosmoVector& galaxy,
-						uint8_t random_iterations) {
+						uint8_t random_iterations,
+						bool use_weighted_randoms) {
   int16_t tree_resolution = min_resolution_;
   if (regionation_resolution_ > min_resolution_)
     tree_resolution = regionation_resolution_;
@@ -189,7 +194,7 @@ void RadialCorrelation::FindPairAutoCorrelation(Map& stomp_map,
 
     // Generate set of random points based on the input galaxy file and map.
     CosmoVector random_galaxy;
-    stomp_map.GenerateRandomPoints(random_galaxy, galaxy);
+    stomp_map.GenerateRandomPoints(random_galaxy, galaxy, use_weighted_randoms);
 
     // Create the TreeMap from those random points.
     TreeMap* random_tree = new TreeMap(tree_resolution, 200);
@@ -255,7 +260,8 @@ void RadialCorrelation::FindPairAutoCorrelation(Map& stomp_map,
 void RadialCorrelation::FindPairCrossCorrelation(Map& stomp_map,
 						CosmoVector& galaxy_z,
 						WAngularVector& galaxy_w,
-						uint8_t random_iterations) {
+						uint8_t random_iterations,
+						bool use_weighted_randoms) {
   int16_t tree_resolution = min_resolution_;
   if (regionation_resolution_ > min_resolution_)
     tree_resolution = regionation_resolution_;
@@ -320,8 +326,10 @@ void RadialCorrelation::FindPairCrossCorrelation(Map& stomp_map,
     // Generate set of random points based on the input galaxy file and map.
     CosmoVector random_galaxy_z;
     WAngularVector random_galaxy_w;
-    stomp_map.GenerateRandomPoints(random_galaxy_z, galaxy_z);
-    stomp_map.GenerateRandomPoints(random_galaxy_w, galaxy_w);
+    stomp_map.GenerateRandomPoints(random_galaxy_z, galaxy_z,
+    		                           use_weighted_randoms);
+    stomp_map.GenerateRandomPoints(random_galaxy_w, galaxy_w,
+    		                           use_weighted_randoms);
 
     // Create the TreeMap from those random points.
     TreeMap* random_tree = new TreeMap(tree_resolution, 200);
@@ -403,7 +411,8 @@ void RadialCorrelation::FindPairCrossCorrelation(Map& stomp_map,
 void RadialCorrelation::FindAutoCorrelationWithRegions(Map& stomp_map,
 						       CosmoVector& gal,
 						       uint8_t random_iter,
-						       uint16_t n_regions) {
+						       uint16_t n_regions,
+						       bool use_weighted_randoms) {
 
   if (n_regions == 0) n_regions = static_cast<uint16_t>(2*radialbin_.size());
   std::cout << "Stomp::RadialCorrelation::FindAutoCorrelationWithRegions - " <<
@@ -435,14 +444,15 @@ void RadialCorrelation::FindAutoCorrelationWithRegions(Map& stomp_map,
     UseOnlyPairs();
   }
 
-  FindPairAutoCorrelation(stomp_map, gal, random_iter);
+  FindPairAutoCorrelation(stomp_map, gal, random_iter, use_weighted_randoms);
 }
 
 void RadialCorrelation::FindCrossCorrelationWithRegions(Map& stomp_map,
 						       CosmoVector& galaxy_z,
 						       WAngularVector& galaxy_w,
 						       uint8_t random_iter,
-						       uint16_t n_regions) {
+						       uint16_t n_regions,
+						       bool use_weighted_randoms) {
 
   if (n_regions == 0) n_regions = static_cast<uint16_t>(2*radialbin_.size());
   std::cout << "Stomp::RadialCorrelation::FindCrossCorrelationWithRegions - " <<
@@ -474,7 +484,8 @@ void RadialCorrelation::FindCrossCorrelationWithRegions(Map& stomp_map,
     UseOnlyPairs();
   }
 
-  FindPairCrossCorrelation(stomp_map, galaxy_z, galaxy_w, random_iter);
+  FindPairCrossCorrelation(stomp_map, galaxy_z, galaxy_w, random_iter,
+  		                     use_weighted_randoms);
 }
 
 bool RadialCorrelation::Write(const std::string& output_file_name) {

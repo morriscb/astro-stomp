@@ -146,6 +146,56 @@ ScalarMap::ScalarMap(ScalarMap& scalar_map,
   }
 }
 
+ScalarMap::ScalarMap(ScalarMap& scalar_map,
+		     uint32_t input_resolution,
+		     ScalarMapType scalar_map_type,
+		     double min_unmasked_fraction) {
+  if (input_resolution > scalar_map.Resolution()) {
+    std::cout << "Stomp::ScalarMap::ScalarMap - " <<
+      "Cannot make higher resolution density map " <<
+      "by resampling. Exiting.\n";
+    exit(1);
+  }
+
+  resolution_ = input_resolution;
+  unmasked_fraction_minimum_ = min_unmasked_fraction;
+  map_type_ = scalar_map_type;
+
+  area_ = 0.0;
+  total_intensity_ = 0.0;
+  total_points_ = 0;
+
+  if (scalar_map.Resolution() == resolution_) {
+    pix_.reserve(scalar_map.Size());
+    for (ScalarIterator iter=scalar_map.Begin();
+    		iter!=scalar_map.End();++iter) {
+    	area_ += iter->Area()*iter->Weight();
+    	ScalarPixel tmp_pix(iter->PixelX(), iter->PixelY(), resolution_,
+    	    				iter->Weight());
+    	pix_.push_back(tmp_pix);
+    }
+  } else {
+    PixelVector superpix;
+    scalar_map.Coverage(superpix, resolution_, true);
+
+    pix_.resize(superpix.size());
+    for (PixelIterator iter=superpix.begin();iter!=superpix.end();++iter) {
+    	if (iter->Weight() > unmasked_fraction_minimum_) {
+    		area_ += iter->Area()*iter->Weight();
+    		ScalarPixel tmp_pix(iter->PixelX(), iter->PixelY(), resolution_,
+    				iter->Weight());
+    		pix_.push_back(tmp_pix);
+    	}
+    }
+  }
+
+  sort(pix_.begin(), pix_.end(), Pixel::LocalOrder);
+  mean_intensity_ = 0.0;
+  converted_to_overdensity_ = false;
+  calculated_mean_intensity_ = false;
+  use_local_mean_intensity_ = false;
+}
+
 ScalarMap::ScalarMap(ScalarVector& pix,
 		     ScalarMapType scalar_map_type,
 		     double min_unmasked_fraction) {
@@ -549,15 +599,16 @@ void ScalarMap::Coverage(PixelVector& superpix, uint32_t resolution,
     resolution = resolution_;
   }
 
-  std::map<uint32_t, bool> coverage_map;
+  std::map<Pixel, bool, PixelOrdering> coverage_map;
   for (ScalarIterator iter=pix_.begin(); iter != pix_.end(); ++iter) {
-    coverage_map[iter->SuperPix(resolution)] = true;
+  	Pixel tmp_pix = *iter;
+  	tmp_pix.SetToSuperPix(resolution);
+    coverage_map[tmp_pix] = true;
   }
 
-  for (std::map<uint32_t, bool>::iterator iter=coverage_map.begin();
+  for (std::map<Pixel, bool, PixelOrdering>::iterator iter=coverage_map.begin();
        iter != coverage_map.end(); ++iter) {
-    Pixel tmp_pix(resolution, iter->first, 1.0);
-
+  	Pixel tmp_pix = iter->first;
     if (calculate_fraction) {
       tmp_pix.SetWeight(FindUnmaskedFraction(tmp_pix));
     }
@@ -1166,7 +1217,7 @@ void ScalarMap::AutoCorrelate(AngularCorrelation& wtheta) {
     }
 
     for (ThetaIterator theta_iter=theta_begin;
-	 theta_iter!=theta_end;++theta_iter) AutoCorrelate(theta_iter);
+         theta_iter!=theta_end;++theta_iter) AutoCorrelate(theta_iter);
 
     if (convert_back_to_raw) ConvertFromOverDensity();
   } else {
@@ -1300,7 +1351,7 @@ void ScalarMap::CrossCorrelate(ScalarMap& scalar_map,
 
     for (ThetaIterator theta_iter=theta_begin;
 	 theta_iter!=theta_end;++theta_iter)
-      CrossCorrelate(scalar_map,theta_iter);
+      CrossCorrelate(scalar_map, theta_iter);
 
     if (convert_back_to_raw) ConvertFromOverDensity();
     if (convert_input_map_back_to_raw) scalar_map.ConvertFromOverDensity();
@@ -1356,6 +1407,67 @@ void ScalarMap::CrossCorrelate(ScalarMap& scalar_map,
 
   if (convert_back_to_raw) ConvertFromOverDensity();
   if (convert_input_map_back_to_raw) scalar_map.ConvertFromOverDensity();
+}
+
+void ScalarMap::CrossCorrelate(WAngularVector& wang_vect,
+			       AngularCorrelation& wtheta) {
+  ThetaIterator theta_begin = wtheta.Begin();
+  ThetaIterator theta_end = wtheta.End();
+  if (theta_begin->Resolution() <= 0) {
+  	wtheta.AssignBinResolutions();
+  }
+
+  if (theta_begin != theta_end) {
+    for (ThetaIterator theta_iter=theta_begin;
+	 theta_iter!=theta_end;++theta_iter) {
+    	if (theta_iter->Resolution() == resolution_)
+    		CrossCorrelate(wang_vect, theta_iter);
+    	else {
+    		ScalarMap scalar_map(*this, theta_iter->Resolution());
+    		scalar_map.CrossCorrelate(wang_vect, theta_iter);
+    	}
+    }
+
+  } else {
+    std::cout << "Stomp::ScalarMap::CrossCorrelate - " <<
+      "No angular bins have resolution " << resolution_ << "...\n";
+  }
+}
+
+void ScalarMap::CrossCorrelate(WAngularVector& wang_vect,
+			       ThetaIterator theta_iter) {
+
+  bool convert_back_to_raw = false;
+  if (!converted_to_overdensity_) {
+    ConvertToOverDensity();
+    convert_back_to_raw = true;
+  }
+
+  theta_iter->ResetPixelWtheta();
+
+  // Same as the auto-correlation case, although this time we're iterating
+  // over the pixels in the input ScalarMap.  We also don't exclude pixels
+  // if their LocalOrder puts them before our input ScalarMap's pixel since
+  // double-counting isn't an issue.
+  for (WAngularIterator wang_iter = wang_vect.begin();
+       wang_iter!=wang_vect.end();++wang_iter) {
+  	ScalarPixel spix = ScalarPixel((*wang_iter), resolution_);
+  	ScalarVector pixVec = ScalarVector();
+  	spix._WithinAnnulus(*theta_iter, pixVec);
+
+    for (ScalarIterator pix_iter=pixVec.begin();
+         pix_iter!=pixVec.end();++pix_iter) {
+    	ScalarPair iter = equal_range(pix_.begin(), pix_.end(), *pix_iter,
+    			Pixel::LocalOrder);
+      if (iter.first != iter.second) {
+        theta_iter->AddToPixelWtheta(
+        		iter.first->Intensity()*iter.first->Weight()*wang_iter->Weight(),
+        		iter.first->Weight());
+      }
+    }
+  }
+
+  if (convert_back_to_raw) ConvertFromOverDensity();
 }
 
 void ScalarMap::CrossCorrelateWithRegions(ScalarMap& scalar_map,

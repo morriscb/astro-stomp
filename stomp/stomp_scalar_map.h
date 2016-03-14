@@ -88,6 +88,13 @@ class ScalarMap : public BaseMap {
   ScalarMap(ScalarMap& scalar_map,
 	    uint32_t resolution,
 	    double min_unmasked_fraction = 0.0000001);
+  // Similar to above but for the case where we want to create a scalar map of
+  // a different type from the geometry of the previous map. This is more
+  // compact and quicker than finding the covering from the original Map again.
+  ScalarMap(ScalarMap& scalar_map,
+  		     uint32_t input_resolution,
+  		     ScalarMapType scalar_map_type,
+  		     double min_unmasked_fraction = 0.0000001);
 
   // Initialize based on a vector of ScalarPixels.  If the input vector contains
   // pixels with heterogeneous resolutions, the code will exit automatically.
@@ -255,6 +262,8 @@ class ScalarMap : public BaseMap {
   // considered in the cross-correlation.
   void CrossCorrelate(ScalarMap& scalar_map, AngularCorrelation& wtheta);
   void CrossCorrelate(ScalarMap& scalar_map, ThetaIterator theta_iter);
+  void CrossCorrelate(WAngularVector& ang_vect, AngularCorrelation& wtheta);
+  void CrossCorrelate(WAngularVector& ang_vect, ThetaIterator theta_iter);
   void CrossCorrelateWithRegions(ScalarMap& scalar_map,
 				 AngularCorrelation& wtheta);
   void CrossCorrelateWithRegions(ScalarMap& scalar_map,

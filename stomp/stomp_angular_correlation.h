@@ -97,11 +97,13 @@ class AngularCorrelation {
   // Some wrapper methods for find the auto-correlation and cross-correlations
   void FindAutoCorrelation(Map& stomp_map,
 			   WAngularVector& galaxy,
-			   uint8_t random_iterations = 1);
+			   uint8_t random_iterations = 1,
+			   bool use_weighted_randoms = false);
   void FindCrossCorrelation(Map& stomp_map,
 			    WAngularVector& galaxy_a,
 			    WAngularVector& galaxy_b,
-			    uint8_t random_iterations = 1);
+			    uint8_t random_iterations = 1,
+			    bool use_weighted_randoms = false);
 
   // Variation on the wrapper methods that use regions to calculate the
   // cosmic variance on the correlation functions.  If you don't specify the
@@ -110,12 +112,14 @@ class AngularCorrelation {
   void FindAutoCorrelationWithRegions(Map& stomp_map,
 				      WAngularVector& galaxy,
 				      uint8_t random_iterations = 1,
-				      uint16_t n_regions = 0);
+				      uint16_t n_regions = 0,
+				      bool use_weighted_randoms = false);
   void FindCrossCorrelationWithRegions(Map& stomp_map,
 				       WAngularVector& galaxy_a,
 				       WAngularVector& galaxy_b,
 				       uint8_t random_iterations = 1,
-				       uint16_t n_regions = 0);
+				       uint16_t n_regions = 0,
+				       bool use_weighted_randoms = false);
 
   // In general, the code will use a pair-based method for small angular
   // scanes and a pixel-based method for large angular scales.  In the above
@@ -130,11 +134,12 @@ class AngularCorrelation {
   void FindPixelCrossCorrelation(ScalarMap& stomp_map_a,
 				 ScalarMap& stomp_map_b);
   void FindPairAutoCorrelation(Map& stomp_map, WAngularVector& galaxy,
-			       uint8_t random_iterations = 1);
+			       uint8_t random_iterations = 1, bool use_weighted_randoms = false);
   void FindPairCrossCorrelation(Map& stomp_map,
 				WAngularVector& galaxy_a,
 				WAngularVector& galaxy_b,
-				uint8_t random_iterations = 1);
+				uint8_t random_iterations = 1,
+				bool use_weighted_randoms = false);
 
   // Once we're done calculating our correlation function, we can write it out
   // to an ASCII file.  The output format will be

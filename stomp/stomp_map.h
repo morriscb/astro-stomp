@@ -334,7 +334,7 @@ class Map : public BaseMap {
   void GenerateRandomPoints(CosmoVector& ang, CosmoVector& input_ang,
 			    bool use_weighted_sampling = false);
 
-  //Like the above methods but only returns a single random angular vector on
+  //Like the above methods but only returns a single random angular point on
   //the map. Boolien is used to return the weight of the map at the random
   // position.
   void GenerateSingleRandomPoint(WeightedAngularCoordinate& ang,
