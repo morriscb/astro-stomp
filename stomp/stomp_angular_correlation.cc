@@ -211,14 +211,15 @@ void AngularCorrelation::FindAutoCorrelation(Map& stomp_map,
     AutoMaxResolution(galaxy.size(), stomp_map.Area());
 
   if (theta_pixel_begin_ != theta_pixel_end_)
-    FindPixelAutoCorrelation(stomp_map, galaxy);
+    FindPixelAutoCorrelation(stomp_map, galaxy, use_weighted_randoms);
 
   if (theta_pair_begin_ != theta_pair_end_)
     FindPairAutoCorrelation(stomp_map, galaxy, random_iterations,
     		                    use_weighted_randoms);
 }
 
-void AngularCorrelation::FindCrossCorrelation(Map& stomp_map,
+void AngularCorrelation::FindCrossCorrelation(Map& stomp_map_a,
+		            Map& stomp_map_b,
 					      WAngularVector& galaxy_a,
 					      WAngularVector& galaxy_b,
 					      uint8_t random_iterations,
@@ -226,15 +227,18 @@ void AngularCorrelation::FindCrossCorrelation(Map& stomp_map,
   if (!manual_resolution_break_) {
     uint32_t n_obj =
       static_cast<uint32_t>(sqrt(1.0*galaxy_a.size()*galaxy_b.size()));
-    AutoMaxResolution(n_obj, stomp_map.Area());
+    double area = stomp_map_a.Area();
+    if (stomp_map_b.Area() < area) area = stomp_map_b.Area();
+    AutoMaxResolution(n_obj, area);
   }
 
   if (theta_pixel_begin_ != theta_pixel_end_)
-    FindPixelCrossCorrelation(stomp_map, galaxy_a, galaxy_b);
+    FindPixelCrossCorrelation(stomp_map_a, stomp_map_b, galaxy_a, galaxy_b,
+    		                      use_weighted_randoms);
 
   if (theta_pair_begin_ != theta_pair_end_)
-    FindPairCrossCorrelation(stomp_map, galaxy_a, galaxy_b, random_iterations,
-    		                     use_weighted_randoms);
+    FindPairCrossCorrelation(stomp_map_a, stomp_map_b, galaxy_a, galaxy_b,
+    		                     random_iterations, use_weighted_randoms);
 }
 
 void AngularCorrelation::FindAutoCorrelationWithRegions(Map& stomp_map,
@@ -276,14 +280,15 @@ void AngularCorrelation::FindAutoCorrelationWithRegions(Map& stomp_map,
   }
 
   if (theta_pixel_begin_ != theta_pixel_end_)
-    FindPixelAutoCorrelation(stomp_map, gal);
+    FindPixelAutoCorrelation(stomp_map, gal, use_weighted_randoms);
 
   if (theta_pair_begin_ != theta_pair_end_)
     FindPairAutoCorrelation(stomp_map, gal, random_iter,
     		                    use_weighted_randoms);
 }
 
-void AngularCorrelation::FindCrossCorrelationWithRegions(Map& stomp_map,
+void AngularCorrelation::FindCrossCorrelationWithRegions(Map& stomp_map_a,
+		           Map& stomp_map_b,
 							 WAngularVector& gal_a,
 							 WAngularVector& gal_b,
 							 uint8_t random_iter,
@@ -292,13 +297,13 @@ void AngularCorrelation::FindCrossCorrelationWithRegions(Map& stomp_map,
   if (!manual_resolution_break_) {
     uint32_t n_obj =
       static_cast<uint32_t>(sqrt(1.0*gal_a.size()*gal_b.size()));
-    AutoMaxResolution(n_obj, stomp_map.Area());
+    AutoMaxResolution(n_obj, stomp_map_a.Area());
   }
 
   if (n_regions == 0) n_regions = static_cast<uint16_t>(2*thetabin_.size());
-  uint16_t n_true_regions = stomp_map.NRegion();
+  uint16_t n_true_regions = stomp_map_a.NRegion();
   if (n_true_regions == 0)
-    n_true_regions = stomp_map.InitializeRegions(n_regions);
+    n_true_regions = stomp_map_a.InitializeRegions(n_regions);
   if (n_true_regions != n_regions) {
     std::cout << "Stomp::AngularCorrelation::FindCrossCorrelationWithRegions" <<
       " - Splitting into " << n_true_regions << " rather than " <<
@@ -306,7 +311,7 @@ void AngularCorrelation::FindCrossCorrelationWithRegions(Map& stomp_map,
     n_regions = n_true_regions;
   }
 
-  regionation_resolution_ = stomp_map.RegionResolution();
+  regionation_resolution_ = stomp_map_a.RegionResolution();
 
   std::cout << "Stomp::AngularCorrelation::FindCrossCorrelationWithRegions" <<
     " - Regionated at " << regionation_resolution_ << "...\n";
@@ -323,20 +328,21 @@ void AngularCorrelation::FindCrossCorrelationWithRegions(Map& stomp_map,
   }
 
   if (theta_pixel_begin_ != theta_pixel_end_)
-    FindPixelCrossCorrelation(stomp_map, gal_a, gal_b);
+    FindPixelCrossCorrelation(stomp_map_a, stomp_map_b, gal_a, gal_b,
+    		                      use_weighted_randoms);
 
   if (theta_pair_begin_ != theta_pair_end_)
-    FindPairCrossCorrelation(stomp_map, gal_a, gal_b, random_iter,
-    		                     use_weighted_randoms);
+    FindPairCrossCorrelation(stomp_map_a, stomp_map_b, gal_a, gal_b,
+    		                     random_iter, use_weighted_randoms);
 }
 
 void AngularCorrelation::FindPixelAutoCorrelation(Map& stomp_map,
-						  WAngularVector& galaxy) {
+						  WAngularVector& galaxy, bool use_weighted_randoms) {
 
   std::cout << "Stomp::AngularCorrelation::FindPixelAutoCorrelation - " <<
     "Initializing ScalarMap at " << max_resolution_ << "...\n";
   ScalarMap* scalar_map = new ScalarMap(stomp_map, max_resolution_,
-					ScalarMap::DensityField);
+					ScalarMap::DensityField, false, use_weighted_randoms);
   if (stomp_map.NRegion() > 0) {
     std::cout << "Stomp::AngularCorrelation::FindPixelAutoCorrelation - " <<
       "Intializing regions...\n";
@@ -403,27 +409,40 @@ void AngularCorrelation::FindPixelAutoCorrelation(ScalarMap& scalar_map) {
   }
 }
 
-void AngularCorrelation::FindPixelCrossCorrelation(Map& stomp_map,
+void AngularCorrelation::FindPixelCrossCorrelation(Map& stomp_map_a,
+		           Map& stomp_map_b,
 						   WAngularVector& galaxy_a,
-						   WAngularVector& galaxy_b) {
+						   WAngularVector& galaxy_b,
+						   bool use_weighted_randoms) {
+
   std::cout << "Stomp::AngularCorrelation::FindPixelCrossCorrelation - " <<
     "Initialing ScalarMaps at " << max_resolution_ << "...\n";
-  ScalarMap* scalar_map_a = new ScalarMap(stomp_map, max_resolution_,
-					  ScalarMap::DensityField);
-  ScalarMap* scalar_map_b = new ScalarMap(stomp_map, max_resolution_,
-					  ScalarMap::DensityField);
-  if (stomp_map.NRegion() > 0) {
+  ScalarMap* scalar_map_a = new ScalarMap(stomp_map_a, max_resolution_,
+	    ScalarMap::DensityField, 0.0000001, false, use_weighted_randoms);
+  ScalarMap* scalar_map_b = new ScalarMap(stomp_map_b, max_resolution_,
+	    ScalarMap::DensityField, 0.0000001, false, use_weighted_randoms);
+
+  if (stomp_map_a.NRegion() > 0) {
     std::cout << "Stomp::AngularCorrelation::FindPixelCrossCorrelation - " <<
       "Intializing regions...\n";
-    scalar_map_a->InitializeRegions(stomp_map);
-    scalar_map_b->InitializeRegions(stomp_map);
+    scalar_map_a->InitializeRegions(stomp_map_a);
+    scalar_map_b->InitializeRegions(stomp_map_b);
   }
 
   uint32_t n_filtered = 0;
   uint32_t n_kept = 0;
   for (WAngularIterator iter=galaxy_a.begin();iter!=galaxy_a.end();++iter) {
-    if (stomp_map.Contains(*iter)) {
+    if (stomp_map_a.Contains(*iter)) {
       n_filtered++;
+//      if (use_weighted_randoms){
+//      	Pixel tmp_pix = Pixel(*iter, max_resolution_);
+//      	WeightedAngularCoordinate tmp_wang = WeightedAngularCoordinate(
+//      			iter->UnitSphereX(), iter->UnitSphereY(), iter->UnitSphereZ(),
+//      			iter->Weight() / stomp_map_a.FindAverageWeight(tmp_pix));
+//      	if (scalar_map_a->AddToMap(tmp_wang)) n_kept++;
+//      } else {
+//
+//      }
       if (scalar_map_a->AddToMap(*iter)) n_kept++;
     }
   }
@@ -440,7 +459,7 @@ void AngularCorrelation::FindPixelCrossCorrelation(Map& stomp_map,
   n_filtered = 0;
   n_kept = 0;
   for (WAngularIterator iter=galaxy_b.begin();iter!=galaxy_b.end();++iter) {
-    if (stomp_map.Contains(*iter)) {
+    if (stomp_map_b.Contains(*iter)) {
       n_filtered++;
       if (scalar_map_b->AddToMap(*iter)) n_kept++;
     }
@@ -626,7 +645,8 @@ void AngularCorrelation::FindPairAutoCorrelation(Map& stomp_map,
   }
 }
 
-void AngularCorrelation::FindPairCrossCorrelation(Map& stomp_map,
+void AngularCorrelation::FindPairCrossCorrelation(Map& stomp_map_a,
+		          Map& stomp_map_b,
 						  WAngularVector& galaxy_a,
 						  WAngularVector& galaxy_b,
 						  uint8_t random_iterations,
@@ -640,7 +660,7 @@ void AngularCorrelation::FindPairCrossCorrelation(Map& stomp_map,
   uint32_t n_kept = 0;
   uint32_t n_fail = 0;
   for (WAngularIterator iter=galaxy_a.begin();iter!=galaxy_a.end();++iter) {
-    if (stomp_map.Contains(*iter)) {
+    if (stomp_map_a.Contains(*iter)) {
       n_kept++;
       if (!galaxy_tree_a->AddPoint(*iter)) {
 	std::cout << "Stomp::AngularCorrelation::FindPairCrossCorrelation - " <<
@@ -655,8 +675,8 @@ void AngularCorrelation::FindPairCrossCorrelation(Map& stomp_map,
     n_kept - n_fail << "/" << galaxy_a.size() <<
     " objects added to tree;" << n_fail << " failed adds...\n";
 
-  if (stomp_map.NRegion() > 0) {
-    if (!galaxy_tree_a->InitializeRegions(stomp_map)) {
+  if (stomp_map_a.NRegion() > 0) {
+    if (!galaxy_tree_a->InitializeRegions(stomp_map_a)) {
       std::cout << "Stomp::AngularCorrelation::FindPairCrossCorrelation - " <<
 	"Failed to initialize regions on TreeMap  Exiting.\n";
       exit(2);
@@ -667,7 +687,7 @@ void AngularCorrelation::FindPairCrossCorrelation(Map& stomp_map,
   std::cout << "Stomp::AngularCorrelation::FindPairCrossCorrelation - \n";
   std::cout << "\tGalaxy-galaxy pairs...\n";
   for (ThetaIterator iter=theta_pair_begin_;iter!=theta_pair_end_;++iter) {
-    if (stomp_map.NRegion() > 0) {
+    if (stomp_map_a.NRegion() > 0) {
       galaxy_tree_a->FindWeightedPairsWithRegions(galaxy_b, *iter);
     } else {
       galaxy_tree_a->FindWeightedPairs(galaxy_b, *iter);
@@ -693,16 +713,16 @@ void AngularCorrelation::FindPairCrossCorrelation(Map& stomp_map,
     std::cout << "\tRandom iteration " <<
       static_cast<int>(rand_iter) << "...\n";
     WAngularVector random_galaxy_a;
-    stomp_map.GenerateRandomPoints(random_galaxy_a, galaxy_a,
-    		                           use_weighted_randoms);
+    stomp_map_a.GenerateRandomPoints(random_galaxy_a, galaxy_a,
+    		                             use_weighted_randoms);
 
     WAngularVector random_galaxy_b;
-    stomp_map.GenerateRandomPoints(random_galaxy_b, galaxy_b,
-    		                           use_weighted_randoms);
+    stomp_map_b.GenerateRandomPoints(random_galaxy_b, galaxy_b,
+    		                             use_weighted_randoms);
 
     // Galaxy-Random
     for (ThetaIterator iter=theta_pair_begin_;iter!=theta_pair_end_;++iter) {
-      if (stomp_map.NRegion() > 0) {
+      if (stomp_map_a.NRegion() > 0) {
 	galaxy_tree_a->FindWeightedPairsWithRegions(random_galaxy_b, *iter);
       } else {
 	galaxy_tree_a->FindWeightedPairs(random_galaxy_b, *iter);
@@ -721,8 +741,8 @@ void AngularCorrelation::FindPairCrossCorrelation(Map& stomp_map,
       }
     }
 
-    if (stomp_map.NRegion() > 0) {
-      if (!random_tree_a->InitializeRegions(stomp_map)) {
+    if (stomp_map_a.NRegion() > 0) {
+      if (!random_tree_a->InitializeRegions(stomp_map_a)) {
 	std::cout << "Stomp::AngularCorrelation::FindPairCrossCorrelation - " <<
 	  "Failed to initialize regions on TreeMap  Exiting.\n";
 	exit(2);
@@ -731,7 +751,7 @@ void AngularCorrelation::FindPairCrossCorrelation(Map& stomp_map,
 
     // Random-Galaxy
     for (ThetaIterator iter=theta_pair_begin_;iter!=theta_pair_end_;++iter) {
-      if (stomp_map.NRegion() > 0) {
+      if (stomp_map_a.NRegion() > 0) {
 	random_tree_a->FindWeightedPairsWithRegions(galaxy_b, *iter);
       } else {
 	random_tree_a->FindWeightedPairs(galaxy_b, *iter);
@@ -741,7 +761,7 @@ void AngularCorrelation::FindPairCrossCorrelation(Map& stomp_map,
 
     // Random-Random
     for (ThetaIterator iter=theta_pair_begin_;iter!=theta_pair_end_;++iter) {
-      if (stomp_map.NRegion() > 0) {
+      if (stomp_map_a.NRegion() > 0) {
 	random_tree_a->FindWeightedPairsWithRegions(random_galaxy_b, *iter);
       } else {
 	random_tree_a->FindWeightedPairs(random_galaxy_b, *iter);

@@ -81,7 +81,8 @@ class ScalarMap : public BaseMap {
 	    uint32_t resolution,
 	    ScalarMapType scalar_map_type = ScalarField,
 	    double min_unmasked_fraction = 0.0000001,
-	    bool use_map_weight_as_intensity = false);
+	    bool use_map_weight_as_intensity = false,
+	    bool use_map_weight_as_weight = false);
 
   // If the map used to initialize the current one is also a ScalarMap, then
   // the ScalarMapType will be based on the input map, as will the geometry.

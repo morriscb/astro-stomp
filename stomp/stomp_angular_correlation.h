@@ -99,7 +99,8 @@ class AngularCorrelation {
 			   WAngularVector& galaxy,
 			   uint8_t random_iterations = 1,
 			   bool use_weighted_randoms = false);
-  void FindCrossCorrelation(Map& stomp_map,
+  void FindCrossCorrelation(Map& stomp_map_a,
+  		    Map& stomp_map_b,
 			    WAngularVector& galaxy_a,
 			    WAngularVector& galaxy_b,
 			    uint8_t random_iterations = 1,
@@ -114,7 +115,8 @@ class AngularCorrelation {
 				      uint8_t random_iterations = 1,
 				      uint16_t n_regions = 0,
 				      bool use_weighted_randoms = false);
-  void FindCrossCorrelationWithRegions(Map& stomp_map,
+  void FindCrossCorrelationWithRegions(Map& stomp_map_a,
+  		         Map& stomp_map_b,
 				       WAngularVector& galaxy_a,
 				       WAngularVector& galaxy_b,
 				       uint8_t random_iterations = 1,
@@ -127,15 +129,18 @@ class AngularCorrelation {
   // separately, these methods allow you to do this.  If the Map used
   // to call these methods has initialized regions, then the estimators will
   // use the region-based methods.
-  void FindPixelAutoCorrelation(Map& stomp_map, WAngularVector& galaxy);
+  void FindPixelAutoCorrelation(Map& stomp_map, WAngularVector& galaxy,
+  		                          bool use_weighted_randoms = false);
   void FindPixelAutoCorrelation(ScalarMap& stomp_map);
-  void FindPixelCrossCorrelation(Map& stomp_map, WAngularVector& galaxy_a,
-				 WAngularVector& galaxy_b);
+  void FindPixelCrossCorrelation(Map& stomp_map_a, Map& stomp_map_b,
+  		   WAngularVector& galaxy_a,
+				 WAngularVector& galaxy_b,
+				 bool use_weighted_randoms = false);
   void FindPixelCrossCorrelation(ScalarMap& stomp_map_a,
 				 ScalarMap& stomp_map_b);
   void FindPairAutoCorrelation(Map& stomp_map, WAngularVector& galaxy,
 			       uint8_t random_iterations = 1, bool use_weighted_randoms = false);
-  void FindPairCrossCorrelation(Map& stomp_map,
+  void FindPairCrossCorrelation(Map& stomp_map_a, Map& stomp_map_b,
 				WAngularVector& galaxy_a,
 				WAngularVector& galaxy_b,
 				uint8_t random_iterations = 1,

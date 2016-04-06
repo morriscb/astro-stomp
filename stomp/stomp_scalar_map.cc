@@ -39,7 +39,8 @@ ScalarMap::ScalarMap() {
 ScalarMap::ScalarMap(Map& stomp_map, uint32_t input_resolution,
 		     ScalarMapType scalar_map_type,
 		     double min_unmasked_fraction,
-		     bool use_map_weight_as_intensity) {
+		     bool use_map_weight_as_intensity,
+		     bool use_map_weight_as_weight) {
   resolution_ = input_resolution;
   unmasked_fraction_minimum_ = min_unmasked_fraction;
   map_type_ = scalar_map_type;
@@ -66,6 +67,8 @@ ScalarMap::ScalarMap(Map& stomp_map, uint32_t input_resolution,
       if (unmasked_fraction > unmasked_fraction_minimum_) {
         if (use_map_weight_as_intensity)
           initial_intensity = stomp_map.FindAverageWeight(*sub_iter);
+        if (use_map_weight_as_weight)
+        	unmasked_fraction *= stomp_map.FindAverageWeight(*sub_iter);
         ScalarPixel tmp_pix(sub_iter->PixelX(), sub_iter->PixelY(),
 			    sub_iter->Resolution(), unmasked_fraction,
 			    initial_intensity, 0);
