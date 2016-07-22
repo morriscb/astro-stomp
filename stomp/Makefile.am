@@ -6,7 +6,8 @@ AUTOMAKE_OPTIONS = foreign
 # Common flags.
 CXXFLAGS = @CXXFLAGS@ -Wall -std=c++0x
 #-stdlib=libc++ #CBM removed -stdlib=libc++
-LDFLAGS = @LDFLAGS@ @GFLAGS_LIB@
+LDFLAGS = @LDFLAGS@ 
+# @GFLAGS_LIB@
 INCLUDES = -I@top_srcdir@/stomp/ 
 # @GFLAGS_INCLUDE@ #CBM removed gflags
 
