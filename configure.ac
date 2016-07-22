@@ -98,16 +98,16 @@ AC_ARG_WITH(gflags_dir, AC_HELP_STRING([--with-gflags-dir=PREFIX],
                                        [prefix directory containing gflags]),
             [gflags_dir_given="yes"])
 
-if test "$gflags_dir_given" = "yes"; then
-  GFLAGS_INCLUDE="-I$with_gflags_dir/include"
-  GFLAGS_LIB="-L$with_gflags_dir/lib"
-  AC_SUBST(GFLAGS_INCLUDE)
-  AC_SUBST(GFLAGS_LIB)
-  CFLAGS="$CFLAGS -I$with_gflags_dir/include"
-  CPPFLAGS="$CPPFLAGS -I$with_gflags_dir/include"
-  CXXFLAGS="$CXXFLAGS -I$with_gflags_dir/include"
-  LDFLAGS="$LDFLAGS -L$with_gflags_dir/lib"
-fi
+# if test "$gflags_dir_given" = "yes"; then #CBM removed gflags
+#   GFLAGS_INCLUDE="-I$with_gflags_dir/include"
+#   GFLAGS_LIB="-L$with_gflags_dir/lib"
+#   AC_SUBST(GFLAGS_INCLUDE)
+#   AC_SUBST(GFLAGS_LIB)
+#   CFLAGS="$CFLAGS -I$with_gflags_dir/include"
+#   CPPFLAGS="$CPPFLAGS -I$with_gflags_dir/include"
+#   CXXFLAGS="$CXXFLAGS -I$with_gflags_dir/include"
+#   LDFLAGS="$LDFLAGS -L$with_gflags_dir/lib"
+# fi
 
 # Location of zlib directories as input by user.
 zlib_dir_given="no"
@@ -144,11 +144,11 @@ AC_CHECK_HEADER([set], [], [AC_MSG_ERROR([cannot find STL set])])
 AC_CHECK_HEADER([queue], [], [AC_MSG_ERROR([cannot find STL queue])])
 AC_CHECK_HEADER([algorithm], [], [AC_MSG_ERROR([cannot find STL algorithms])])
 
-# Check for gflags
-AC_LANG_CPLUSPLUS
-AC_CHECK_HEADER(google/gflags.h, [], [AC_MSG_ERROR([cannot find gflags.h])])
-AC_CHECK_LIB([gflags], [main], [],
-             [AC_MSG_ERROR([cannot find libgflags])])
+# Check for gflags # CBM removed gflags
+# AC_LANG_CPLUSPLUS
+# AC_CHECK_HEADER(google/gflags.h, [], [AC_MSG_ERROR([cannot find gflags.h])])
+# AC_CHECK_LIB([gflags], [main], [],
+#              [AC_MSG_ERROR([cannot find libgflags])])
 
 # Check for zlib
 AC_LANG_CPLUSPLUS
