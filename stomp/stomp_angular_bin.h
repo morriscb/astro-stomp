@@ -111,8 +111,8 @@ class AngularBin {
   // are operating on, so they store the values in Weight (for the sum of the
   // products of the object Weights) and Counter, which stores the raw number
   // of point pairs.
-  void AddToWeight(double weight, int16_t region_a = -1, int16_t region_b = -1);
-  void AddToCounter(uint32_t step=1, int16_t region_a = -1, int16_t region_b = -1);
+  void AddToWeight(double weight, int16_t region = -1);
+  void AddToCounter(uint32_t step=1, int16_t region = -1);
 
   // For calculating the pair-based w(theta), we use the Landy-Szalay estimator.
   // In the general case of a cross-correlation between two galaxy data sets,
@@ -210,7 +210,7 @@ class AngularBin {
   std::vector<double> wtheta_region_, wtheta_error_region_;
   std::vector<uint32_t> counter_region_;
   uint32_t resolution_;
-  int16_t n_region_, n_region_pairs_;
+  int16_t n_region_;
   bool set_wtheta_error_, set_wtheta_;
 };
 

@@ -90,16 +90,16 @@ class TreePixel : public Pixel {
   // versions put the number of pairs in the Counter and Weight values for each
   // angular bin.
   uint32_t DirectPairCount(AngularCoordinate& ang, AngularBin& theta,
-			   int16_t region_a = -1, int16_t region_b = -1);
+			   int16_t region = -1);
   uint32_t FindPairs(AngularCoordinate& ang, AngularBin& theta,
-		     int16_t region_a = -1, int16_t region_b = -1);
+		     int16_t region = -1);
   uint32_t FindPairs(AngularCoordinate& ang,
 		     double theta_min, double theta_max);
   uint32_t FindPairs(AngularCoordinate& ang, double theta_max);
   double DirectWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
-			     int16_t region_a = -1, int16_t region_b = -1);
+			     int16_t region = -1);
   double FindWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
-			   int16_t region_a = -1, int16_t region_b = -1);
+			   int16_t region = -1);
   double FindWeightedPairs(AngularCoordinate& ang,
 			   double theta_min, double theta_max);
   double FindWeightedPairs(AngularCoordinate& ang, double theta_max);
@@ -107,9 +107,9 @@ class TreePixel : public Pixel {
   // And for the case where we want to scale things by a weight associated with
   // each angular point explicitly.
   double DirectWeightedPairs(WeightedAngularCoordinate& w_ang,
-			     AngularBin& theta, int16_t region_a = -1, int16_t region_b = -1);
+			     AngularBin& theta, int16_t region = -1);
   double FindWeightedPairs(WeightedAngularCoordinate& w_ang,
-			   AngularBin& theta, int16_t region_a = -1, int16_t region_b = -1);
+			   AngularBin& theta, int16_t region = -1);
   double FindWeightedPairs(WeightedAngularCoordinate& w_ang,
 			   double theta_min, double theta_max);
   double FindWeightedPairs(WeightedAngularCoordinate& w_ang,
@@ -119,35 +119,35 @@ class TreePixel : public Pixel {
   // the corresponding angular bin and the sum of the products of the weights
   // are put into the Weight field, if applicable.
   void FindPairs(AngularVector& ang, AngularBin& theta,
-		 int16_t region_a = -1, int16_t region_b = -1);
+		 int16_t region = -1);
   void FindPairs(AngularVector& ang, AngularCorrelation& wtheta,
-		 int16_t region_a = -1, int16_t region_b = -1);
+		 int16_t region = -1);
   void FindWeightedPairs(AngularVector& ang, AngularBin& theta,
-			 int16_t region_a = -1, int16_t region_b = -1);
+			 int16_t region = -1);
   void FindWeightedPairs(AngularVector& ang, AngularCorrelation& wtheta,
-			 int16_t region_a = -1, int16_t region_b = -1);
+			 int16_t region = -1);
   void FindWeightedPairs(WAngularVector& w_ang, AngularBin& theta,
-			 int16_t region_a = -1, int16_t region_b = -1);
+			 int16_t region = -1);
   void FindWeightedPairs(WAngularVector& w_ang,
-			 AngularCorrelation& wtheta, int16_t region_a = -1, int16_t region_b = -1);
+			 AngularCorrelation& wtheta, int16_t region = -1);
 
   // Since the WeightedAngularCoordinates that are fed into our tree also
   // have an arbitrary number of named Fields associated with them, we need
   // to be able to access those values as well in our pair counting.
   double DirectWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
 			     const std::string& field_name,
-			     int16_t region_a = -1, int16_t region_b = -1);
+			     int16_t region = -1);
   double FindWeightedPairs(AngularCoordinate& ang, AngularBin& theta,
-			   const std::string& field_name, int16_t region_a = -1, int16_t region_b = -1);
+			   const std::string& field_name, int16_t region = -1);
   double FindWeightedPairs(AngularCoordinate& ang,
 			   double theta_min, double theta_max,
 			   const std::string& field_name);
   double FindWeightedPairs(AngularCoordinate& ang, double theta_max,
 			   const std::string& field_name);
   void FindWeightedPairs(AngularVector& ang, AngularBin& theta,
-			 const std::string& field_name, int16_t region_a = -1, int16_t region_b = -1);
+			 const std::string& field_name, int16_t region = -1);
   void FindWeightedPairs(AngularVector& ang, AngularCorrelation& wtheta,
-			 const std::string& field_name, int16_t region_a = -1, int16_t region_b = -1);
+			 const std::string& field_name, int16_t region = -1);
 
   // If we have a WeightedAngularCoordinate as the input, then we need to
   // account for the case where you want to use the weight associated with
@@ -155,27 +155,27 @@ class TreePixel : public Pixel {
   // the input coordinate.  First the Weight vs. Field case.
   double DirectWeightedPairs(WeightedAngularCoordinate& w_ang,
 			     AngularBin& theta, const std::string& field_name,
-			     int16_t region_a = -1, int16_t region_b = -1);
+			     int16_t region = -1);
   double FindWeightedPairs(WeightedAngularCoordinate& w_ang, AngularBin& theta,
-			   const std::string& field_name, int16_t region_a = -1, int16_t region_b = -1);
+			   const std::string& field_name, int16_t region = -1);
   double FindWeightedPairs(WeightedAngularCoordinate& w_ang,
 			   double theta_min, double theta_max,
 			   const std::string& field_name);
   double FindWeightedPairs(WeightedAngularCoordinate& w_ang, double theta_max,
 			   const std::string& field_name);
   void FindWeightedPairs(WAngularVector& w_ang, AngularBin& theta,
-			 const std::string& field_name, int16_t region_a = -1, int16_t region_b = -1);
+			 const std::string& field_name, int16_t region = -1);
   void FindWeightedPairs(WAngularVector& w_ang, AngularCorrelation& wtheta,
-			 const std::string& field_name, int16_t region_a = -1, int16_t region_b = -1);
+			 const std::string& field_name, int16_t region = -1);
 
   // And finally, the Field vs. Field case.
   double DirectWeightedPairs(WeightedAngularCoordinate& w_ang,
 			     const std::string& ang_field_name,
 			     AngularBin& theta, const std::string& field_name,
-			     int16_t region_a = -1, int16_t region_b = -1);
+			     int16_t region = -1);
   double FindWeightedPairs(WeightedAngularCoordinate& w_ang,
 			   const std::string& ang_field_name, AngularBin& theta,
-			   const std::string& field_name, int16_t region_a = -1, int16_t region_b = -1);
+			   const std::string& field_name, int16_t region = -1);
   double FindWeightedPairs(WeightedAngularCoordinate& w_ang,
 			   const std::string& ang_field_name,
 			   double theta_min, double theta_max,
@@ -186,11 +186,11 @@ class TreePixel : public Pixel {
   void FindWeightedPairs(WAngularVector& w_ang,
 			 const std::string& ang_field_name,
 			 AngularBin& theta, const std::string& field_name,
-			 int16_t region_a = -1, int16_t region_b = -1);
+			 int16_t region = -1);
   void FindWeightedPairs(WAngularVector& w_ang,
 			 const std::string& ang_field_name,
 			 AngularCorrelation& wtheta,
-			 const std::string& field_name, int16_t region_a = -1, int16_t region_b = -1);
+			 const std::string& field_name, int16_t region = -1);
 
   // In addition to pair finding, we can also use the tree structure we've
   // built to do efficient nearest neighbor searches.  In the general case,
