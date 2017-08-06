@@ -3,7 +3,7 @@ import sys
 from sys import stdout
 
 # figure out how swig should be called
-swig_addflags='-DWITH_PYTHON'
+swig_addflags='-DWITH_PYTHON -threads'
 
 # also try to add numpy support
 try:
