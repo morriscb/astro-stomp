@@ -1604,7 +1604,7 @@ void Map::GenerateRandomPoints(AngularVector& ang, uint32_t n_point,
 
   for (uint32_t m=0;m<n_point;m++) {
     bool keep = false;
-    double lambda, eta, z, weight, probability_limit;
+    double lambda, eta, z, weight, probability_limit, eta_min, eta_max;
     AngularCoordinate tmp_ang(0.0,0.0);
     uint32_t n,k;
 
@@ -1615,8 +1615,10 @@ void Map::GenerateRandomPoints(AngularVector& ang, uint32_t n_point,
       z = sub_map_[k].ZMin() + mtrand.rand(sub_map_[k].ZMax() -
 					   sub_map_[k].ZMin());
       lambda = asin(z)*RadToDeg;
-      eta = sub_map_[k].EtaMin() + mtrand.rand(sub_map_[k].EtaMax() -
-					       sub_map_[k].EtaMin());
+      eta_min = sub_map_[k].EtaMin();
+      eta_max = sub_map_[k].EtaMax();
+      if (eta_min > eta_max) eta_min -= 360.;
+      eta = eta_min + mtrand.rand(eta_max - eta_min);
       tmp_ang.SetSurveyCoordinates(lambda,eta);
 
       keep = sub_map_[k].FindLocation(tmp_ang,weight);
@@ -1659,7 +1661,7 @@ void Map::GenerateRandomPoints(WAngularVector& ang, WAngularVector& input_ang,
   for (uint32_t m=0;m<input_ang.size();m++) {
     if (Contains(input_ang[m])) {
       bool keep = false;
-      double lambda, eta, z, map_weight, probability_limit;
+      double lambda, eta, z, map_weight, probability_limit, eta_min, eta_max;
       uint32_t n,k;
 
       while (!keep) {
@@ -1669,8 +1671,10 @@ void Map::GenerateRandomPoints(WAngularVector& ang, WAngularVector& input_ang,
 	z = sub_map_[k].ZMin() + mtrand.rand(sub_map_[k].ZMax() -
 					     sub_map_[k].ZMin());
 	lambda = asin(z)*RadToDeg;
-	eta = sub_map_[k].EtaMin() + mtrand.rand(sub_map_[k].EtaMax() -
-						 sub_map_[k].EtaMin());
+	eta_min = sub_map_[k].EtaMin();
+    eta_max = sub_map_[k].EtaMax();
+    if (eta_min > eta_max) eta_min -= 360.;
+    eta = eta_min + mtrand.rand(eta_max - eta_min);
 	tmp_ang.SetSurveyCoordinates(lambda,eta);
 
 	keep = sub_map_[k].FindLocation(tmp_ang, map_weight);
@@ -1714,7 +1718,7 @@ void Map::GenerateRandomPoints(WAngularVector& ang,
   WeightedAngularCoordinate tmp_ang;
   for (uint32_t m=0;m<weights.size();m++) {
     bool keep = false;
-    double lambda, eta, z, map_weight, probability_limit;
+    double lambda, eta, z, map_weight, probability_limit, eta_min, eta_max;
     uint32_t n,k;
 
     while (!keep) {
@@ -1724,8 +1728,10 @@ void Map::GenerateRandomPoints(WAngularVector& ang,
       z = sub_map_[k].ZMin() + mtrand.rand(sub_map_[k].ZMax() -
 					   sub_map_[k].ZMin());
       lambda = asin(z)*RadToDeg;
-      eta = sub_map_[k].EtaMin() + mtrand.rand(sub_map_[k].EtaMax() -
-					       sub_map_[k].EtaMin());
+      eta_min = sub_map_[k].EtaMin();
+      eta_max = sub_map_[k].EtaMax();
+      if (eta_min > eta_max) eta_min -= 360.;
+      eta = eta_min + mtrand.rand(eta_max - eta_min);
       tmp_ang.SetSurveyCoordinates(lambda,eta);
 
       keep = sub_map_[k].FindLocation(tmp_ang, map_weight);
@@ -1768,7 +1774,7 @@ void Map::GenerateRandomPoints(CosmoVector& ang, CosmoVector& input_ang,
   for (uint32_t m=0;m<input_ang.size();m++) {
     if (Contains(input_ang[m])) {
       bool keep = false;
-      double lambda, eta, z, map_weight, probability_limit;
+      double lambda, eta, z, map_weight, probability_limit, eta_min, eta_max;
       uint32_t n,k,red_id;
 
       while (!keep) {
@@ -1778,8 +1784,10 @@ void Map::GenerateRandomPoints(CosmoVector& ang, CosmoVector& input_ang,
 	z = sub_map_[k].ZMin() + mtrand.rand(sub_map_[k].ZMax() -
 					     sub_map_[k].ZMin());
 	lambda = asin(z)*RadToDeg;
-	eta = sub_map_[k].EtaMin() + mtrand.rand(sub_map_[k].EtaMax() -
-						 sub_map_[k].EtaMin());
+	eta_min = sub_map_[k].EtaMin();
+    eta_max = sub_map_[k].EtaMax();
+    if (eta_min > eta_max) eta_min -= 360.;
+    eta = eta_min + mtrand.rand(eta_max - eta_min);
 	tmp_ang.SetSurveyCoordinates(lambda,eta);
 
 	keep = sub_map_[k].FindLocation(tmp_ang, map_weight);
@@ -1821,7 +1829,7 @@ void Map::GenerateSingleRandomPoint(WeightedAngularCoordinate& ang,
   mtrand.seed();
 
   bool keep = false;
-  double lambda, eta, z, map_weight, probability_limit;
+  double lambda, eta, z, map_weight, probability_limit, eta_min, eta_max;
   uint32_t n,k;
 
   while (!keep) {
@@ -1831,8 +1839,10 @@ void Map::GenerateSingleRandomPoint(WeightedAngularCoordinate& ang,
     z = sub_map_[k].ZMin() + mtrand.rand(sub_map_[k].ZMax() -
 					 sub_map_[k].ZMin());
     lambda = asin(z)*RadToDeg;
-    eta = sub_map_[k].EtaMin() + mtrand.rand(sub_map_[k].EtaMax() -
-					     sub_map_[k].EtaMin());
+    eta_min = sub_map_[k].EtaMin();
+    eta_max = sub_map_[k].EtaMax();
+    if (eta_min > eta_max) eta_min -= 360.;
+    eta = eta_min + mtrand.rand(eta_max - eta_min);
     ang.SetSurveyCoordinates(lambda,eta);
     
     keep = sub_map_[k].FindLocation(ang, map_weight);
@@ -1890,7 +1900,7 @@ PyObject* Map::GenerateRandomPoints(uint32_t n_point,
 
   for (uint32_t m=0;m<n_point;m++) {
     bool keep = false;
-    double lambda, eta, z, weight, probability_limit;
+    double lambda, eta, z, weight, probability_limit, eta_min, eta_max;
     AngularCoordinate tmp_ang(0.0,0.0);
     uint32_t n,k;
 
@@ -1901,8 +1911,10 @@ PyObject* Map::GenerateRandomPoints(uint32_t n_point,
       z = sub_map_[k].ZMin() +
         mtrand.rand(sub_map_[k].ZMax() - sub_map_[k].ZMin());
       lambda = asin(z)*RadToDeg;
-      eta = sub_map_[k].EtaMin() +
-        mtrand.rand(sub_map_[k].EtaMax() - sub_map_[k].EtaMin());
+      eta_min = sub_map_[k].EtaMin();
+      eta_max = sub_map_[k].EtaMax();
+      if (eta_min > eta_max) eta_min -= 360.;
+      eta = eta_min + mtrand.rand(eta_max - eta_min);
       tmp_ang.SetSurveyCoordinates(lambda,eta);
 
       keep = sub_map_[k].FindLocation(tmp_ang,weight);
